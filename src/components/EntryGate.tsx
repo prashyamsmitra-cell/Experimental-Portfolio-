@@ -8,8 +8,9 @@ type GateStatus = "idle" | "submitting" | "success" | "error";
 
 export function EntryGate() {
   const [location, setLocation] = useLocation();
-  const { isAdmin, authReady } = useApp();
-  const [show, setShow] = useState(false);
+  const { isAdmin } = useApp();
+  const shouldShowGate = !isAdmin && !location.startsWith("/admin");
+  const [show, setShow] = useState(shouldShowGate);
   const [status, setStatus] = useState<GateStatus>("idle");
   const [error, setError] = useState("");
   const [form, setForm] = useState({
@@ -20,25 +21,28 @@ export function EntryGate() {
   const emailRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!authReady) return;
-
-    const isEntered = sessionStorage.getItem("portfolio.entered");
-
-    if (isAdmin || location.startsWith("/admin")) {
+    if (!shouldShowGate) {
       setShow(false);
       return;
     }
 
-    if (!isEntered) {
-      setShow(true);
-      setTimeout(() => emailRef.current?.focus(), 300);
-    } else {
-      setShow(false);
+    setStatus("idle");
+    setError("");
+    setForm({
+      email: "",
+      companyName: "",
+      reasonForVisit: "",
+    });
+    setShow(true);
+  }, [shouldShowGate]);
+
+  useEffect(() => {
+    if (show) {
+      emailRef.current?.focus();
     }
-  }, [authReady, isAdmin, location]);
+  }, [show]);
 
   const handleDismiss = () => {
-    sessionStorage.setItem("portfolio.entered", "true");
     setShow(false);
   };
 
@@ -59,7 +63,7 @@ export function EntryGate() {
     try {
       await submitRecruiterVisit(form);
       setStatus("success");
-      setTimeout(handleDismiss, 900);
+      handleDismiss();
     } catch (submissionError) {
       setStatus("error");
       setError(
