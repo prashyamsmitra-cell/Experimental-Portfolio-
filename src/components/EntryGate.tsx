@@ -113,13 +113,12 @@ export function EntryGate() {
 
                   <label className="space-y-2">
                     <span className="block text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                      Company
+                      Company optional
                     </span>
                     <input
                       type="text"
                       value={form.companyName}
                       onChange={(event) => updateField("companyName", event.target.value)}
-                      required
                       disabled={status === "submitting"}
                       className="w-full rounded border border-border bg-background/60 px-3 py-2 text-foreground outline-none transition-colors focus:border-primary"
                       data-testid="input-recruiter-company"
