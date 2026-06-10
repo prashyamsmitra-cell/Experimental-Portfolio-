@@ -4,6 +4,7 @@ import { SectionHeader } from "@/components/SectionHeader";
 import { EditOverlay } from "@/components/EditOverlay";
 import { Github, ExternalLink, Plus, Trash2, X, Check } from "lucide-react";
 import { useApp, Project } from "@/contexts/AppContext";
+import { DepthSurface, ReactivePage, revealItem, staggerContainer } from "@/components/SectionMotion";
 
 function newProject(): Project {
   return { id: Date.now().toString(), name: '', position: 99, problem: '', architecture: [], stack: [], decisions: [], live_url: null, github_url: '' };
@@ -93,8 +94,13 @@ export default function Projects() {
 
   const canEdit = isAdmin && !previewMode;
 
+  const openLiveProject = (url: string | null) => {
+    if (!url) return;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   return (
-    <div className="min-h-[100dvh] pt-24 pb-16 px-4">
+    <ReactivePage className="min-h-[100dvh] pt-24 pb-16 px-4">
       {editingProject && <ProjectEditDialog project={editingProject} onSave={saveProject} onClose={() => setEditingProject(null)} />}
       {deletingId && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setDeletingId(null)}>
@@ -120,27 +126,69 @@ export default function Projects() {
           )}
         </div>
 
-        <motion.div variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } }}
+        <motion.div variants={staggerContainer}
           initial="hidden" animate="show" className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {projects.map((project) => (
-            <motion.div key={project.id} variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
-              <EditOverlay label="Project" onEdit={() => setEditingProject(project)} className="h-full">
-                <div className="surface p-6 rounded-xl flex flex-col h-full">
+            <motion.div key={project.id} variants={revealItem}>
+              <DepthSurface className="h-full">
+                <EditOverlay label="Project" onEdit={() => setEditingProject(project)} className="h-full">
+                  <div
+                    role={project.live_url ? "link" : undefined}
+                    tabIndex={project.live_url ? 0 : undefined}
+                    onClick={() => openLiveProject(project.live_url)}
+                    onKeyDown={(event) => {
+                      if (project.live_url && (event.key === "Enter" || event.key === " ")) {
+                        event.preventDefault();
+                        openLiveProject(project.live_url);
+                      }
+                    }}
+                    className={`surface p-6 rounded-xl flex flex-col h-full transition-colors hover:border-primary/40 ${
+                      project.live_url ? "cursor-pointer focus:outline-none focus:border-primary/60" : ""
+                    }`}
+                    aria-label={project.live_url ? `Open deployed project: ${project.name}` : undefined}
+                  >
                   <div className="flex justify-between items-start mb-4">
                     <h3 className="text-xl font-bold tracking-tight">{project.name}</h3>
                     <div className="flex gap-1.5">
                       {canEdit && (
-                        <button onClick={() => setDeletingId(project.id)} className="p-1.5 text-muted-foreground hover:text-destructive transition-colors" title="Delete project">
+                        <button
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setDeletingId(project.id);
+                          }}
+                          className="p-1.5 text-muted-foreground hover:text-destructive transition-colors"
+                          title="Delete project"
+                        >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       )}
-                      {project.github_url && <a href={project.github_url} className="text-muted-foreground hover:text-foreground transition-colors p-1" target="_blank" rel="noopener noreferrer"><Github className="w-5 h-5" /></a>}
-                      {project.live_url && <a href={project.live_url} className="text-muted-foreground hover:text-foreground transition-colors p-1" target="_blank" rel="noopener noreferrer"><ExternalLink className="w-5 h-5" /></a>}
+                      {project.github_url && (
+                        <a
+                          href={project.github_url}
+                          className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          <Github className="w-5 h-5" />
+                        </a>
+                      )}
+                      {project.live_url && (
+                        <a
+                          href={project.live_url}
+                          className="text-muted-foreground hover:text-foreground transition-colors p-1"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          <ExternalLink className="w-5 h-5" />
+                        </a>
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2 mb-6">
                     {project.stack.map(tech => (
-                      <span key={tech} className="px-2 py-1 bg-secondary rounded text-xs font-mono text-muted-foreground border border-border">{tech}</span>
+                      <span key={tech} className="px-2 py-1 bg-secondary rounded text-xs font-mono text-muted-foreground border border-border transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:text-foreground">{tech}</span>
                     ))}
                   </div>
                   <div className="space-y-5 flex-1">
@@ -152,12 +200,13 @@ export default function Projects() {
                       <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 ml-4">{project.decisions.map(i => <li key={i}>{i}</li>)}</ul>
                     </div>
                   </div>
-                </div>
-              </EditOverlay>
+                  </div>
+                </EditOverlay>
+              </DepthSurface>
             </motion.div>
           ))}
         </motion.div>
       </div>
-    </div>
+    </ReactivePage>
   );
 }

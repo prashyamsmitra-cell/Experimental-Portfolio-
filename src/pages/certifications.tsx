@@ -4,6 +4,7 @@ import { SectionHeader } from "@/components/SectionHeader";
 import { EditOverlay } from "@/components/EditOverlay";
 import { Award, ExternalLink, Plus, Trash2, X, Check } from "lucide-react";
 import { useApp, Certification } from "@/contexts/AppContext";
+import { DepthSurface, ReactivePage, revealItem, staggerContainer } from "@/components/SectionMotion";
 
 function newCert(): Certification {
   return { id: Date.now().toString(), name: '', issuer: '', year: new Date().getFullYear(), credential_url: '#', position: 99 };
@@ -69,7 +70,7 @@ export default function Certifications() {
   };
 
   return (
-    <div className="min-h-[100dvh] pt-24 pb-16 px-4">
+    <ReactivePage className="min-h-[100dvh] pt-24 pb-16 px-4">
       {editingCert && <CertEditDialog cert={editingCert} onSave={saveCert} onClose={() => setEditingCert(null)} />}
       {deletingId && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setDeletingId(null)}>
@@ -95,12 +96,13 @@ export default function Certifications() {
           )}
         </div>
 
-        <motion.div variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } }}
+        <motion.div variants={staggerContainer}
           initial="hidden" animate="show" className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {certs.map((cert) => (
-            <motion.div key={cert.id} variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
-              <EditOverlay label="Cert" onEdit={() => setEditingCert(cert)}>
-                <div className="surface p-5 rounded-lg flex items-start gap-4 hover:border-primary/50 transition-colors group">
+            <motion.div key={cert.id} variants={revealItem}>
+              <DepthSurface>
+                <EditOverlay label="Cert" onEdit={() => setEditingCert(cert)}>
+                  <div className="surface p-5 rounded-lg flex items-start gap-4 hover:border-primary/50 transition-colors group">
                   <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center shrink-0 border border-border group-hover:bg-primary/10 group-hover:border-primary/30 transition-colors">
                     <Award className="w-6 h-6 text-primary" />
                   </div>
@@ -121,12 +123,13 @@ export default function Certifications() {
                       <ExternalLink className="w-4 h-4" />
                     </a>
                   </div>
-                </div>
-              </EditOverlay>
+                  </div>
+                </EditOverlay>
+              </DepthSurface>
             </motion.div>
           ))}
         </motion.div>
       </div>
-    </div>
+    </ReactivePage>
   );
 }

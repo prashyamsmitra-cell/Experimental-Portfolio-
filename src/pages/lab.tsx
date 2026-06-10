@@ -7,6 +7,7 @@ import { EngineeringNote } from "@/components/EngineeringNote";
 import { TokenBucket } from "@/lib/token-bucket";
 import { CacheService } from "@/lib/cache-service";
 import { Play, Square, RefreshCcw, Database, Zap, Clock, Activity, Cpu } from "lucide-react";
+import { DepthSurface, ReactivePage } from "@/components/SectionMotion";
 
 export default function Lab() {
   const [highTraffic, setHighTraffic] = useState(false);
@@ -187,9 +188,14 @@ export default function Lab() {
 
 
   return (
-    <div className="min-h-[100dvh] pt-24 pb-16 px-4">
+    <ReactivePage className="min-h-[100dvh] pt-24 pb-16 px-4">
       <div className="container mx-auto max-w-4xl">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45 }}
+          className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4"
+        >
           <SectionHeader 
             eyebrow="// systems_lab" 
             title="Interactive Architecture" 
@@ -206,16 +212,24 @@ export default function Lab() {
               <div className={`absolute top-1 w-4 h-4 rounded-full bg-background transition-all ${highTraffic ? 'left-7' : 'left-1'}`} />
             </button>
           </div>
-        </div>
+        </motion.div>
 
         <div className="space-y-24">
           
           {/* Rate Limiter Demo */}
-          <section id="rate-limiter" className="scroll-mt-24">
+          <motion.section
+            id="rate-limiter"
+            className="scroll-mt-24"
+            initial={{ opacity: 0, y: 22 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.45 }}
+          >
             <div className="font-mono text-sm text-primary mb-6 uppercase tracking-wider">// rate-limiter</div>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 surface p-6 rounded-xl space-y-6">
+              <DepthSurface className="lg:col-span-2">
+                <div className="surface p-6 rounded-xl space-y-6 transition-colors hover:border-primary/40">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-xl font-semibold">Token Bucket Algorithm</h3>
                   <button 
@@ -287,7 +301,8 @@ export default function Lab() {
                   <Metric label="Blocked" value={rlMetrics.blocked} color="destructive" />
                   <Metric label="Active RPS" value={isGenerating ? (highTraffic ? rps * 3 : rps) : 0} color={highTraffic ? "warning" : "primary"} />
                 </div>
-              </div>
+                </div>
+              </DepthSurface>
               
               <div className="flex flex-col gap-4">
                 <LogPanel entries={rlLogs} />
@@ -296,14 +311,22 @@ export default function Lab() {
                 </EngineeringNote>
               </div>
             </div>
-          </section>
+          </motion.section>
 
           {/* Cache Demo */}
-          <section id="cache" className="scroll-mt-24">
+          <motion.section
+            id="cache"
+            className="scroll-mt-24"
+            initial={{ opacity: 0, y: 22 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.45 }}
+          >
             <div className="font-mono text-sm text-accent mb-6 uppercase tracking-wider">// cache_strategy</div>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 surface p-6 rounded-xl space-y-6">
+              <DepthSurface className="lg:col-span-2">
+                <div className="surface p-6 rounded-xl space-y-6 transition-colors hover:border-accent/40">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-xl font-semibold">Read-Through Caching</h3>
                   <button 
@@ -357,7 +380,8 @@ export default function Lab() {
                   <Metric label="Avg Hit Lat" value={cacheMetrics.avgCacheLatency} unit="ms" color="success" />
                   <Metric label="Avg Miss Lat" value={cacheMetrics.avgDbLatency} unit="ms" color="warning" />
                 </div>
-              </div>
+                </div>
+              </DepthSurface>
               
               <div className="flex flex-col gap-4">
                 <LogPanel entries={cacheLogs} />
@@ -366,14 +390,22 @@ export default function Lab() {
                 </EngineeringNote>
               </div>
             </div>
-          </section>
+          </motion.section>
 
           {/* Queue Demo */}
-          <section id="queue" className="scroll-mt-24">
+          <motion.section
+            id="queue"
+            className="scroll-mt-24"
+            initial={{ opacity: 0, y: 22 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.45 }}
+          >
             <div className="font-mono text-sm text-info mb-6 uppercase tracking-wider">// async_queues</div>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 surface p-6 rounded-xl space-y-6">
+              <DepthSurface className="lg:col-span-2">
+                <div className="surface p-6 rounded-xl space-y-6 transition-colors hover:border-info/40">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-xl font-semibold">Background Job Processing</h3>
                   <div className="flex gap-3">
@@ -438,7 +470,8 @@ export default function Lab() {
                   <Metric label="Done" value={jobs.filter(j => j.status === 'completed').length} color="success" />
                   <Metric label="Failed" value={jobs.filter(j => j.status === 'failed').length} color="destructive" />
                 </div>
-              </div>
+                </div>
+              </DepthSurface>
               
               <div className="flex flex-col gap-4">
                 <LogPanel entries={queueLogs} />
@@ -447,10 +480,10 @@ export default function Lab() {
                 </EngineeringNote>
               </div>
             </div>
-          </section>
+          </motion.section>
 
         </div>
       </div>
-    </div>
+    </ReactivePage>
   );
 }
